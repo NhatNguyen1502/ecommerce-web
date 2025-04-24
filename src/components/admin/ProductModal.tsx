@@ -1,103 +1,146 @@
 import { useState, useEffect } from "react";
 import { X, Plus, Trash2 } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Product } from "../../types/Product";
-import { Category } from "../../types/Category";
+import type { Product, ProductPayload } from "../../types/Product";
+import type { Category } from "../../types/Category";
 import Button from "../ui/CustomButton";
+import { createProduct, updateProduct } from "@/api/productService";
+import { CATEGORIES, PRODUCTS } from "@/constants/queryKeys";
+import toast from "react-hot-toast";
+import { useForm } from "react-hook-form";
+import LoadingSpinner from "../ui/LoadingSpinner";
 
 interface ProductModalProps {
   product: Product | null;
-  categories: Category[];
   onClose: () => void;
 }
 
-const ProductModal = ({ product, categories, onClose }: ProductModalProps) => {
-  const [formData, setFormData] = useState<
-    Omit<
-      Product,
-      "id" | "averageRating" | "ratingCount" | "createdOn" | "lastUpdatedOn"
-    >
-  >({
-    name: "",
-    categoryId: "",
-    description: "",
-    price: 0,
-    images: [""],
-    isFeatured: false,
+const ProductModal = ({ product, onClose }: ProductModalProps) => {
+  const queryClient = useQueryClient();
+  const { register, handleSubmit, watch } = useForm<ProductPayload>({
+    defaultValues: product
+      ? {
+          name: product.name,
+          description: product.description,
+          price: product.price,
+          categoryId: product.category.id,
+          isFeatured: product.isFeatured,
+        }
+      : undefined,
   });
 
-  const queryClient = useQueryClient();
+  const categories =
+    (queryClient.getQueryState([CATEGORIES])?.data as Category[]) || [];
 
+
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(
+    product?.imageUrl || null
+  );
+  const [hasChanges, setHasChanges] = useState(false);
+
+  // Watch all form fields for changes
+  const watchedFields = watch();
+
+  // Check if form values have changed from original product
   useEffect(() => {
-    if (product) {
-      setFormData({
-        name: product.name,
-        categoryId: product.categoryId,
-        description: product.description,
-        price: product.price,
-        images: [...product.images],
-        isFeatured: product.isFeatured,
-      });
-    }
-  }, [product]);
-
-  const handleChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >
-  ) => {
-    const { name, value, type } = e.target;
-
-    if (type === "checkbox") {
-      const checked = (e.target as HTMLInputElement).checked;
-      setFormData((prev) => ({ ...prev, [name]: checked }));
-    } else if (name === "price") {
-      setFormData((prev) => ({ ...prev, [name]: parseFloat(value) || 0 }));
-    } else {
-      setFormData((prev) => ({ ...prev, [name]: value }));
-    }
-  };
-
-  const handleAddImageField = () => {
-    setFormData((prev) => ({
-      ...prev,
-      images: [...prev.images, ""],
-    }));
-  };
-
-  const handleRemoveImageField = (index: number) => {
-    setFormData((prev) => ({
-      ...prev,
-      images: prev.images.filter((_, i) => i !== index),
-    }));
-  };
-
-  const handleImageChange = (index: number, value: string) => {
-    setFormData((prev) => {
-      const newImages = [...prev.images];
-      newImages[index] = value;
-      return { ...prev, images: newImages };
-    });
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-
-    // Validation
-    if (
-      !formData.name ||
-      !formData.categoryId ||
-      !formData.description ||
-      formData.price <= 0
-    ) {
-      alert("Please fill out all required fields");
+    if (!product) {
+      // For new products, always enable the button
+      setHasChanges(true);
       return;
     }
 
-    // In a real app, this would make an API call
-    // For this demo, we'll just show a success message
-    alert(`Product ${product ? "updated" : "created"} successfully`);
-    onClose();
+    // Check if any form field has changed
+    const formChanged = Boolean(
+      watchedFields.name !== product.name ||
+        watchedFields.description !== product.description ||
+        Number(watchedFields.price) !== product.price ||
+        watchedFields.categoryId !== product.category.id ||
+        watchedFields.isFeatured !== product.isFeatured
+    );
+
+    // Check if image has changed
+    const imageChanged = Boolean(
+      imageFile !== null || (product.imageUrl && imagePreview === null)
+    );
+
+    setHasChanges(formChanged || imageChanged);
+  }, [watchedFields, product, imageFile, imagePreview]);
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setImageFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const removeImage = () => {
+    setImageFile(null);
+    setImagePreview(null);
+  };
+
+  const mutation = useMutation({
+    mutationFn: product
+      ? (formData: FormData) =>
+          updateProduct(
+            product.id,
+            formData,
+            () => {
+              queryClient.invalidateQueries({ queryKey: [PRODUCTS] });
+              onClose();
+              toast.success("Product updated successfully");
+            },
+            (error) => {
+              toast.error(error.message);
+            }
+          )
+      : (formData: FormData) =>
+          createProduct(
+            formData,
+            () => {
+              queryClient.invalidateQueries({ queryKey: [PRODUCTS] });
+              onClose();
+              toast.success("Product added successfully");
+            },
+            (error) => {
+              toast.error(error.message);
+            }
+          ),
+  });
+
+  const onSubmit = (data: ProductPayload) => {
+    // Create a FormData object for multipart/form-data
+    const formData = new FormData();
+
+    // Add the product data as JSON in a part named "product"
+    const productData = {
+      name: data.name,
+      description: data.description,
+      price: data.price,
+      categoryId: data.categoryId,
+      isFeatured: data.isFeatured,
+    };
+
+    // Add the JSON data as a Blob with the correct content type
+    const productBlob = new Blob([JSON.stringify(productData)], {
+      type: "application/json",
+    });
+
+    // Add the product JSON part
+    formData.append("product", productBlob);
+
+    // Add the image file if it exists
+    if (imageFile) {
+      formData.append("image", imageFile);
+    }
+
+    // Send the FormData to the server
+    mutation.mutate(formData);
   };
 
   return (
@@ -115,7 +158,7 @@ const ProductModal = ({ product, categories, onClose }: ProductModalProps) => {
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6">
+        <form onSubmit={handleSubmit(onSubmit)} className="p-6">
           <div className="space-y-6">
             {/* Basic Information */}
             <div>
@@ -128,15 +171,13 @@ const ProductModal = ({ product, categories, onClose }: ProductModalProps) => {
                     htmlFor="name"
                     className="block text-sm font-medium text-gray-700 mb-1"
                   >
-                    Product Name *
+                    Product Name <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
                     id="name"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleChange}
                     required
+                    {...register("name", { required: true, maxLength: 200 })}
                     className="block w-full rounded-md border border-gray-300 py-2 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   />
                 </div>
@@ -146,18 +187,16 @@ const ProductModal = ({ product, categories, onClose }: ProductModalProps) => {
                     htmlFor="categoryId"
                     className="block text-sm font-medium text-gray-700 mb-1"
                   >
-                    Category *
+                    Category <span className="text-red-500">*</span>
                   </label>
                   <select
                     id="categoryId"
-                    name="categoryId"
-                    value={formData.categoryId}
-                    onChange={handleChange}
                     required
+                    {...register("categoryId", { required: true })}
                     className="block w-full rounded-md border border-gray-300 py-2 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   >
                     <option value="">Select a category</option>
-                    {categories.map((category) => (
+                    {categories?.map((category) => (
                       <option key={category.id} value={category.id}>
                         {category.name}
                       </option>
@@ -170,17 +209,15 @@ const ProductModal = ({ product, categories, onClose }: ProductModalProps) => {
                     htmlFor="price"
                     className="block text-sm font-medium text-gray-700 mb-1"
                   >
-                    Price ($) *
+                    Price ($) <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="number"
                     id="price"
-                    name="price"
-                    value={formData.price}
-                    onChange={handleChange}
                     min="0"
                     step="0.01"
                     required
+                    {...register("price", { required: true, min: 0 })}
                     className="block w-full rounded-md border border-gray-300 py-2 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   />
                 </div>
@@ -189,10 +226,8 @@ const ProductModal = ({ product, categories, onClose }: ProductModalProps) => {
                   <div className="flex items-center h-5">
                     <input
                       id="isFeatured"
-                      name="isFeatured"
                       type="checkbox"
-                      checked={formData.isFeatured}
-                      onChange={handleChange}
+                      {...register("isFeatured")}
                       className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                     />
                   </div>
@@ -217,15 +252,13 @@ const ProductModal = ({ product, categories, onClose }: ProductModalProps) => {
                 htmlFor="description"
                 className="block text-sm font-medium text-gray-700 mb-1"
               >
-                Description *
+                Description <span className="text-red-500">*</span>
               </label>
               <textarea
                 id="description"
-                name="description"
                 rows={4}
-                value={formData.description}
-                onChange={handleChange}
                 required
+                {...register("description", { required: true })}
                 className="block w-full rounded-md border border-gray-300 py-2 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
@@ -234,46 +267,55 @@ const ProductModal = ({ product, categories, onClose }: ProductModalProps) => {
             <div>
               <div className="flex justify-between items-center mb-2">
                 <label className="block text-sm font-medium text-gray-700">
-                  Product Images *
+                  Product Image{" "}
+                  {!product && <span className="text-red-500">*</span>}
                 </label>
-                <button
-                  type="button"
-                  onClick={handleAddImageField}
-                  className="inline-flex items-center text-sm text-blue-600 hover:text-blue-800"
-                >
-                  <Plus className="h-4 w-4 mr-1" />
-                  Add Image
-                </button>
               </div>
 
               <div className="space-y-3">
-                {formData.images.map((image, index) => (
-                  <div key={index} className="flex items-center">
-                    <input
-                      type="text"
-                      value={image}
-                      onChange={(e) => handleImageChange(index, e.target.value)}
-                      placeholder="Enter image URL"
-                      className="block w-full rounded-md border border-gray-300 py-2 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    />
-
-                    {formData.images.length > 1 && (
+                {imagePreview ? (
+                  <div className="relative border rounded-lg p-2 w-full">
+                    <div className="flex items-start">
+                      <div className="relative h-40 w-40 rounded-md overflow-hidden">
+                        <img
+                          src={imagePreview || "/placeholder.svg"}
+                          alt="Product preview"
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
                       <button
                         type="button"
-                        onClick={() => handleRemoveImageField(index)}
-                        className="ml-2 text-red-600 hover:text-red-800"
+                        onClick={removeImage}
+                        className="ml-2 p-1 bg-red-100 rounded-full text-red-500 hover:bg-red-200"
                       >
                         <Trash2 className="h-5 w-5" />
                       </button>
-                    )}
+                    </div>
                   </div>
-                ))}
+                ) : (
+                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 flex flex-col items-center justify-center">
+                    <div className="mb-2">
+                      <Plus className="h-8 w-8 text-gray-400" />
+                    </div>
+                    <p className="text-sm text-gray-500 mb-2">
+                      Drag and drop an image, or click to select
+                    </p>
+                    <input
+                      type="file"
+                      id="image"
+                      required
+                      accept="image/*"
+                      onChange={handleImageChange}
+                      className="block w-full text-sm text-gray-500
+                        file:mr-4 file:py-2 file:px-4
+                        file:rounded-md file:border-0
+                        file:text-sm file:font-medium
+                        file:bg-blue-50 file:text-blue-700
+                        hover:file:bg-blue-100"
+                    />
+                  </div>
+                )}
               </div>
-
-              <p className="mt-2 text-sm text-gray-500">
-                Enter URLs for product images. The first image will be used as
-                the main product image.
-              </p>
             </div>
           </div>
 
@@ -281,8 +323,20 @@ const ProductModal = ({ product, categories, onClose }: ProductModalProps) => {
             <Button type="button" variant="outline" onClick={onClose}>
               Cancel
             </Button>
-            <Button type="submit">
-              {product ? "Update Product" : "Create Product"}
+            <Button
+              type="submit"
+              disabled={mutation.isPending || (Boolean(product && !hasChanges))}
+            >
+              {mutation.isPending ? (
+                <LoadingSpinner
+                  className="w-auto"
+                  loadingClassName="text-white"
+                />
+              ) : product ? (
+                "Update Product"
+              ) : (
+                "Create Product"
+              )}
             </Button>
           </div>
         </form>
@@ -292,3 +346,5 @@ const ProductModal = ({ product, categories, onClose }: ProductModalProps) => {
 };
 
 export default ProductModal;
+
+

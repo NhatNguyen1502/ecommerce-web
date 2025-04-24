@@ -25,7 +25,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
       {/* Product Image */}
       <div className="aspect-square overflow-hidden bg-gray-100">
         <img
-          src={product.images[0]}
+          src={product.imageUrl}
           alt={product.name}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
           loading="lazy"
@@ -52,7 +52,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
           <div className="flex items-center">
             <Star className="h-4 w-4 text-yellow-400 fill-yellow-400" />
             <span className="ml-1 text-sm font-medium text-gray-700">
-              {product.averageRating.toFixed(1)}
+              {product.averageRating?.toFixed(1)}
             </span>
           </div>
           <span className="mx-2 text-gray-300">•</span>

@@ -1,15 +1,18 @@
 export interface Product {
   id: string;
   name: string;
-  categoryId: string;
+  category : {
+    id: string
+    name: string 
+  }
   description: string;
   price: number;
-  images: string[];
+  imageUrl: string;
   isFeatured: boolean;
   averageRating: number;
   ratingCount: number;
-  createdOn: string;
-  lastUpdatedOn: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface ProductRating {
@@ -18,13 +21,14 @@ export interface ProductRating {
   userId: string;
   rating: number;
   comment?: string;
-  createdOn: string;
+  createdAt: string;
 }
 
-export interface ProductFilter {
-  categoryId?: string;
-  searchTerm?: string;
-  minPrice?: number;
-  maxPrice?: number;
-  featured?: boolean;
+export interface ProductPayload{
+  name: string;
+  categoryId: string;
+  description: string;
+  price: number;
+  image: File;
+  isFeatured: boolean;
 }

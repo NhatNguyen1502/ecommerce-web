@@ -1,9 +1,9 @@
 import { Suspense, lazy } from 'react';
 import { Route, Routes } from 'react-router-dom';
 import Layout from './components/layout/Layout';
-import LoadingSpinner from './components/ui/LoadingSpinner';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import AdminRoute from './components/auth/AdminRoute';
+import { LoadingOverlay } from './components/ui/LoadingOverlay';
 
 // Lazy-loaded components
 const HomePage = lazy(() => import('./pages/HomePage'));
@@ -20,7 +20,7 @@ const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 
 function App() {
   return (
-    <Suspense fallback={<LoadingSpinner />}>
+    <Suspense fallback={<LoadingOverlay />}>
       <Routes>
         <Route path="/" element={<Layout />}>
           {/* Public routes */}

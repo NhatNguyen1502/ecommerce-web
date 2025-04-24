@@ -1,45 +1,24 @@
-import { Product, ProductFilter, ProductRating } from '../types/Product';
+import { Product, ProductRating } from '../types/Product';
 import { products, productRatings } from './mockData';
+
+import request from "../utils/Axiosconfig";
+
+export const getProducts = async (page: number, size: number) => {
+  const res = await request({
+    method: "get",
+    url: `/api/products?page=${page}&size=${size}`,
+  });
+
+  return {
+    content: res.data.content as Product[],
+    totalPages: res.data.totalPages,
+    totalElements: res.data.totalElements,
+    currentPage: res.data.currentPage || page,
+  };
+};
 
 // Simulated delay
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
-
-export const getProducts = async (filter?: ProductFilter): Promise<Product[]> => {
-  // Simulate API call
-  await delay(800);
-  
-  let filteredProducts = [...products];
-  
-  if (filter) {
-    // Filter by category
-    if (filter.categoryId) {
-      filteredProducts = filteredProducts.filter(p => p.categoryId === filter.categoryId);
-    }
-    
-    // Filter by search term
-    if (filter.searchTerm) {
-      const term = filter.searchTerm.toLowerCase();
-      filteredProducts = filteredProducts.filter(p => 
-        p.name.toLowerCase().includes(term) || p.description.toLowerCase().includes(term)
-      );
-    }
-    
-    // Filter by price range
-    if (filter.minPrice !== undefined) {
-      filteredProducts = filteredProducts.filter(p => p.price >= filter.minPrice!);
-    }
-    if (filter.maxPrice !== undefined) {
-      filteredProducts = filteredProducts.filter(p => p.price <= filter.maxPrice!);
-    }
-    
-    // Filter featured products
-    if (filter.featured !== undefined) {
-      filteredProducts = filteredProducts.filter(p => p.isFeatured === filter.featured);
-    }
-  }
-  
-  return filteredProducts;
-};
 
 export const getProductById = async (id: string): Promise<Product> => {
   // Simulate API call
@@ -54,11 +33,13 @@ export const getProductById = async (id: string): Promise<Product> => {
   return product;
 };
 
-export const getFeaturedProducts = async (): Promise<Product[]> => {
-  // Simulate API call
-  await delay(800);
-  
-  return products.filter(p => p.isFeatured);
+export const getFeaturedProducts = async () => {
+    const res = await request({
+      method: "get",
+      url: "/api/products/featured",
+    });
+
+    return res.data.content as Product[];
 };
 
 export const getProductRatings = async (productId: string): Promise<ProductRating[]> => {
@@ -66,6 +47,45 @@ export const getProductRatings = async (productId: string): Promise<ProductRatin
   await delay(600);
   
   return productRatings.filter(r => r.productId === productId);
+};
+
+
+export const createProduct = async (data: FormData, onSuccess: () => void, onError: (error: any) => void) => {
+  await request({
+    method: "post",
+    url: "/api/products",
+    data,
+    onSuccess,
+    onError,
+  })
+}
+
+export const updateProduct = async (
+  id: string,
+  data: FormData,
+  onSuccess: () => void,
+  onError: (error: any) => void
+) => {
+  await request({
+    method: "put",
+    url: "/api/products/" + id,
+    data,
+    onSuccess,
+    onError,
+  });
+};
+
+export const deleteProduct = async (
+  id: string,
+  onSuccess: () => void,
+  onError: (error: any) => void
+) => {
+  await request({
+    method: "delete",
+    url: `/api/products/${id}`,
+    onSuccess,
+    onError,
+  });
 };
 
 export const addProductRating = async (rating: Omit<ProductRating, 'id' | 'createdOn'>): Promise<ProductRating> => {
@@ -76,7 +96,6 @@ export const addProductRating = async (rating: Omit<ProductRating, 'id' | 'creat
   const newRating: ProductRating = {
     id: String(productRatings.length + 1),
     ...rating,
-    createdOn: new Date().toISOString(),
   };
   
   // In a real app, this would add the rating to the database
@@ -89,8 +108,6 @@ export const addProductRating = async (rating: Omit<ProductRating, 'id' | 'creat
     const totalRating = productRatingsList.reduce((sum, r) => sum + r.rating, 0);
     product.averageRating = totalRating / productRatingsList.length;
     product.ratingCount = productRatingsList.length;
-    product.lastUpdatedOn = new Date().toISOString();
   }
-  
   return newRating;
 };

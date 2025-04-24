@@ -10,6 +10,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { postCategory, putCategory } from "../../api/categoryService";
 import toast from "react-hot-toast";
 import { CATEGORIES } from "../../constants/queryKeys";
+import LoadingSpinner from "../ui/LoadingSpinner";
 
 interface CategoryModalProps {
   category: Category | null;
@@ -92,9 +93,13 @@ const CategoryModal = ({ category, onClose }: CategoryModalProps) => {
             <Button type="button" variant="outline" onClick={onClose}>
               Cancel
             </Button>
-            <Button type="submit">
-              {category ? "Update Category" : "Create Category"}
-            </Button>
+            {mutation.isPending ? (
+              <LoadingSpinner className="w-auto" />
+            ) : (
+              <Button type="submit">
+                {category ? "Update Category" : "Create Category"}
+              </Button>
+            )}
           </div>
         </form>
       </div>
@@ -103,4 +108,5 @@ const CategoryModal = ({ category, onClose }: CategoryModalProps) => {
 };
 
 export default CategoryModal;
+
 

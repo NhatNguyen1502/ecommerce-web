@@ -10,6 +10,7 @@ import { Category } from "../../types/Category";
 import { CATEGORIES } from "../../constants/queryKeys";
 import { DeleteButton } from "@/components/admin/DeleteButton";
 import toast from "react-hot-toast";
+import { formatTimeAgo } from "@/helpers/formatTime";
 
 const AdminCategories = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -49,14 +50,6 @@ const AdminCategories = () => {
     setCurrentCategory(null);
   };
 
-  if (isLoading) {
-    return (
-      <AdminLayout>
-        <LoadingSpinner className="py-16" />
-      </AdminLayout>
-    );
-  }
-
   return (
     <AdminLayout>
       <div className="mb-6 flex justify-between items-center">
@@ -87,8 +80,15 @@ const AdminCategories = () => {
                 scope="col"
                 className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
               >
-                Products
+                Create At
               </th>
+              <th
+                scope="col"
+                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              >
+                Update At
+              </th>
+
               <th
                 scope="col"
                 className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider"
@@ -98,7 +98,7 @@ const AdminCategories = () => {
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {categories?.map((category) => (
+            {isLoading ? <LoadingSpinner /> : categories?.map((category) => (
               <tr key={category.id}>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="text-sm font-medium text-gray-900">
@@ -106,9 +106,16 @@ const AdminCategories = () => {
                   </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm text-gray-900">12</div>{" "}
-                  {/* This would be dynamic in a real app */}
+                  <div className="text-sm font-medium text-gray-900">
+                    {formatTimeAgo(category.createdAt)}
+                  </div>
                 </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <div className="text-sm font-medium text-gray-900">
+                    {formatTimeAgo(category.updatedAt)}
+                  </div>
+                </td>
+
                 <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                   <button
                     onClick={() => handleEditCategory(category)}
@@ -136,5 +143,3 @@ const AdminCategories = () => {
 };
 
 export default AdminCategories;
-
-

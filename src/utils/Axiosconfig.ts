@@ -1,9 +1,9 @@
 import axios, { AxiosRequestConfig } from 'axios';
+import toast from 'react-hot-toast';
 
 const httpClient = axios.create({
   baseURL: import.meta.env.VITE_BASE_SERVER_URL,
   headers: {
-    'Content-Type': 'application/json',
     Accept: 'application/json',
   },
   withCredentials: true,
@@ -114,8 +114,9 @@ httpClient.interceptors.response.use(
         });
       }
     } else if (error.response?.status === 403) {
+      toast.error(error.response?.data?.message || 'Access denied.');
       // error('Session expired. Please log in again.');
-      window.location.href = '/login';
+      // window.location.href = '/login';
     }
     console.log(error);
 

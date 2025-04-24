@@ -14,6 +14,7 @@ import LoadingSpinner from "../components/ui/LoadingSpinner";
 import Button from "../components/ui/CustomButton";
 import ProductReviews from "../components/product/ProductReviews";
 import ProductRatingForm from "../components/product/ProductRatingForm";
+import { LoadingOverlay } from "@/components/ui/LoadingOverlay";
 
 const ProductDetailPage = () => {
   const { productId } = useParams<{ productId: string }>();
@@ -29,8 +30,8 @@ const ProductDetailPage = () => {
   });
 
   const { data: category, isLoading: categoryLoading } = useQuery({
-    queryKey: ["category", product?.categoryId],
-    queryFn: () => getCategoryById(product!.categoryId),
+    queryKey: ["category", product?.category.id],
+    queryFn: () => getCategoryById(product!.category.id),
     enabled: !!product,
   });
 
@@ -57,7 +58,7 @@ const ProductDetailPage = () => {
   };
 
   if (productLoading || categoryLoading) {
-    return <LoadingSpinner className="py-16" />;
+    return <LoadingOverlay />;
   }
 
   if (!product) {
@@ -118,34 +119,11 @@ const ProductDetailPage = () => {
         <div className="space-y-4">
           <div className="aspect-square overflow-hidden rounded-lg bg-gray-100">
             <img
-              src={product.images[activeImageIndex]}
+              src={product.imageUrl}
               alt={product.name}
               className="w-full h-full object-cover"
             />
           </div>
-
-          {/* Thumbnail Gallery */}
-          {product.images.length > 1 && (
-            <div className="flex space-x-4">
-              {product.images.map((image, index) => (
-                <button
-                  key={index}
-                  className={`w-20 h-20 rounded-md overflow-hidden border-2 transition-all ${
-                    activeImageIndex === index
-                      ? "border-blue-600"
-                      : "border-transparent"
-                  }`}
-                  onClick={() => setActiveImageIndex(index)}
-                >
-                  <img
-                    src={image}
-                    alt={`${product.name} - Image ${index + 1}`}
-                    className="w-full h-full object-cover"
-                  />
-                </button>
-              ))}
-            </div>
-          )}
         </div>
 
         {/* Product Info */}
@@ -253,11 +231,11 @@ const ProductDetailPage = () => {
             </div>
             <div>
               <span className="font-medium text-gray-900">Added:</span>{" "}
-              {new Date(product.createdOn).toLocaleDateString()}
+              {new Date(product.createdAt).toLocaleDateString()}
             </div>
             <div>
               <span className="font-medium text-gray-900">Last Updated:</span>{" "}
-              {new Date(product.lastUpdatedOn).toLocaleDateString()}
+              {new Date(product.updatedAt).toLocaleDateString()}
             </div>
           </div>
         </div>
