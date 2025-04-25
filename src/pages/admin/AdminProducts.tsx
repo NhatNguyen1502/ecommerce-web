@@ -1,10 +1,7 @@
-"use client";
-
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Plus, Edit } from "lucide-react";
 import { deleteProduct, getProducts } from "../../api/productService";
-import { getCategories } from "../../api/categoryService";
 import AdminLayout from "../../components/admin/AdminLayout";
 import Button from "../../components/ui/CustomButton";
 import LoadingSpinner from "../../components/ui/LoadingSpinner";
@@ -12,12 +9,12 @@ import ProductModal from "../../components/admin/ProductModal";
 import Pagination from "../../components/ui/Pagination";
 import { usePagination } from "../../hooks/usePagination";
 import type { Product } from "../../types/Product";
-import { CATEGORIES, PRODUCTS } from "@/constants/queryKeys";
+import { PRODUCTS } from "@/constants/queryKeys";
 import { DeleteButton } from "@/components/admin/DeleteButton";
 import toast from "react-hot-toast";
-import Tooltip from "@/components/ui/tooltip";
+import Tooltip from "@/components/ui/Tooltip";
 import { formatTimeAgo } from "@/helpers/formatTime";
-import { Category } from "@/types/Category";
+import PageSizeSelector from "@/components/ui/PageSizeSelector";
 
 const AdminProducts = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -82,24 +79,7 @@ const AdminProducts = () => {
       </div>
 
       {/* Page size selector */}
-      <div className="mb-4 flex justify-end">
-        <div className="flex items-center">
-          <label htmlFor="pageSize" className="mr-2 text-sm text-gray-600">
-            Items per page:
-          </label>
-          <select
-            id="pageSize"
-            value={pageSize}
-            onChange={handlePageSizeChange}
-            className="rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm"
-          >
-            <option value="5">5</option>
-            <option value="10">10</option>
-            <option value="20">20</option>
-            <option value="50">50</option>
-          </select>
-        </div>
-      </div>
+      <PageSizeSelector pageSize={pageSize} handlePageSizeChange={handlePageSizeChange} />
 
       {/* Products Table */}
       <div className="bg-white shadow-sm rounded-lg overflow-hidden">

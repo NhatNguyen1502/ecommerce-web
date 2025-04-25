@@ -3,7 +3,12 @@ export interface User {
   email: string;
   firstName: string;
   lastName: string;
-  role: 'customer' | 'admin';
+  phoneNumber: string;
+  address: string;
+  role: "customer" | "admin";
+  active: boolean;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export type SignUpPayload = {
@@ -19,4 +24,8 @@ export type SignUpPayload = {
 export type SignInPayload = {
   email: string;
   password: string;
+}
+
+export type UpdateStatusPayload = {
+  isActive: boolean
 }
