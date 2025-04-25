@@ -43,7 +43,7 @@ export function DeleteButton({
           <DialogHeader>
             <DialogTitle className="text-red-500">Confirm Deletion</DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete {itemName}? This action cannot be
+              Are you sure you want to delete <span className="font-bold text-red-500">{itemName} </span>? This action cannot be
               undone.
             </DialogDescription>
           </DialogHeader>

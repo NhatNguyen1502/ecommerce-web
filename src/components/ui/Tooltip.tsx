@@ -68,17 +68,16 @@ const Tooltip = ({
   }, [isVisible]);
 
   return (
-    <div
+    <span
       ref={triggerRef}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
-      className="inline-block cursor-help"
     >
       {children}
 
       {isVisible &&
         createPortal(
-          <div
+          <span
             ref={tooltipRef}
             style={{
               top: `${position.top}px`,
@@ -89,10 +88,10 @@ const Tooltip = ({
             className="fixed z-50 p-3 text-sm bg-gray-900 text-white rounded shadow-lg animate-in fade-in duration-200 overflow-y-auto"
           >
             <div className="whitespace-normal break-words">{content}</div>
-          </div>,
+          </span>,
           document.body
         )}
-    </div>
+    </span>
   );
 };
 

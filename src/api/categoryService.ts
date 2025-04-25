@@ -8,7 +8,7 @@ export const getCategories = async () => {
     url: "/api/categories",
   });
 
-  return res.data.content as Category[];
+  return res.data as Category[];
 };
 
 export const getCategoryById = async (id: string): Promise<Category> => {
