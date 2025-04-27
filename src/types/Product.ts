@@ -11,17 +11,21 @@ export interface Product {
   isFeatured: boolean;
   averageRating: number;
   ratingCount: number;
+  quantity: number;
   createdAt: string;
   updatedAt: string;
 }
 
 export interface ProductRating {
   id: string;
-  productId: string;
-  userId: string;
   rating: number;
-  comment?: string;
+  content?: string;
   createdAt: string;
+  customer: {
+    id: string;
+    fullName: string;
+    email: string;
+  }
 }
 
 export interface ProductPayload{
@@ -29,6 +33,12 @@ export interface ProductPayload{
   categoryId: string;
   description: string;
   price: number;
+  quantity: number;
   image: File;
   isFeatured: boolean;
+}
+
+export interface ProductRatingPayload{
+  rating: number;
+  content?: string;
 }

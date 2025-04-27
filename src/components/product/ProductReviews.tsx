@@ -12,7 +12,7 @@ const ProductReviews = ({ ratings }: ProductReviewsProps) => {
   
   const sortedRatings = [...ratings].sort((a, b) => {
     if (sortBy === 'recent') {
-      return new Date(b.createdOn).getTime() - new Date(a.createdOn).getTime();
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
     } else if (sortBy === 'highestRated') {
       return b.rating - a.rating;
     } else {
@@ -117,6 +117,9 @@ const ProductReviews = ({ ratings }: ProductReviewsProps) => {
               </div>
               <div className="flex-1">
                 <div className="flex items-center mb-1">
+                  <div className="text-sm font-medium text-gray-700 mr-2"> 
+                    {rating.customer.fullName}
+                  </div>
                   <div className="flex mr-2">
                     {[...Array(5)].map((_, index) => (
                       <Star
@@ -134,10 +137,10 @@ const ProductReviews = ({ ratings }: ProductReviewsProps) => {
                   </span>
                 </div>
                 <div className="text-xs text-gray-500 mb-2">
-                  {format(new Date(rating.createdOn), 'MMM dd, yyyy')}
+                  {format(new Date(rating.createdAt), 'MMM dd, yyyy')}
                 </div>
-                {rating.comment && (
-                  <p className="text-gray-700">{rating.comment}</p>
+                {rating.content && (
+                  <p className="text-gray-700">{rating.content}</p>
                 )}
               </div>
             </div>

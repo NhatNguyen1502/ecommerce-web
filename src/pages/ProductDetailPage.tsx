@@ -2,44 +2,37 @@ import { useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { Minus, Plus, ShoppingCart, Star, ChevronLeft } from "lucide-react";
-import {
-  getProductById,
-  getProductRatings,
-  addProductRating,
-} from "../api/productService";
-import { getCategoryById } from "../api/categoryService";
+import { getProductById, getProductRatings } from "../api/productService";
 import { useAuth } from "../hooks/useAuth";
 import { useCart } from "../hooks/useCart";
 import LoadingSpinner from "../components/ui/LoadingSpinner";
 import Button from "../components/ui/CustomButton";
 import ProductReviews from "../components/product/ProductReviews";
 import ProductRatingForm from "../components/product/ProductRatingForm";
-import { LoadingOverlay } from "@/components/ui/LoadingOverlay";
+import { formatVND } from "@/helpers/formatCurrency";
+import { PRODUCT, PRODUCT_RATINGS } from "@/constants/queryKeys";
 
 const ProductDetailPage = () => {
   const { productId } = useParams<{ productId: string }>();
   const [quantity, setQuantity] = useState(1);
-  const [activeImageIndex, setActiveImageIndex] = useState(0);
   const { user } = useAuth();
   const { addToCart } = useCart();
 
-  const { data: product, isLoading: productLoading } = useQuery({
-    queryKey: ["product", productId],
+  const { data: product } = useQuery({
+    queryKey: [PRODUCT, productId],
     queryFn: () => getProductById(productId!),
     enabled: !!productId,
   });
 
-  const { data: category, isLoading: categoryLoading } = useQuery({
-    queryKey: ["category", product?.category.id],
-    queryFn: () => getCategoryById(product!.category.id),
-    enabled: !!product,
-  });
-
   const { data: ratings, isLoading: ratingsLoading } = useQuery({
-    queryKey: ["productRatings", productId],
+    queryKey: [PRODUCT_RATINGS, productId],
     queryFn: () => getProductRatings(productId!),
     enabled: !!productId,
   });
+  let averageRating = 0;
+  if (ratings) {
+      averageRating = (ratings.reduce((sum, r) => sum + r.rating, 0) / ratings.length) || 0;
+  }
 
   const incrementQuantity = () => {
     setQuantity((prevQuantity) => prevQuantity + 1);
@@ -56,10 +49,6 @@ const ProductDetailPage = () => {
       addToCart(product, quantity);
     }
   };
-
-  if (productLoading || categoryLoading) {
-    return <LoadingOverlay />;
-  }
 
   if (!product) {
     return (
@@ -88,17 +77,15 @@ const ProductDetailPage = () => {
         <Link to="/products" className="hover:text-blue-600">
           Products
         </Link>
-        {category && (
-          <>
-            <span className="mx-2">/</span>
-            <Link
-              to={`/products/category/${category.id}`}
-              className="hover:text-blue-600"
-            >
-              {category.name}
-            </Link>
-          </>
-        )}
+        <>
+          <span className="mx-2">/</span>
+          <Link
+            to={`/products/category/${product.category.id}`}
+            className="hover:text-blue-600"
+          >
+            {product.category.name}
+          </Link>
+        </>
         <span className="mx-2">/</span>
         <span className="text-gray-800 font-medium">{product.name}</span>
       </div>
@@ -145,9 +132,13 @@ const ProductDetailPage = () => {
                 <Star
                   key={index}
                   className={`h-5 w-5 ${
-                    index < Math.floor(product.averageRating)
+                    index <
+                    Math.floor(
+                      averageRating
+                    )
                       ? "text-yellow-400 fill-yellow-400"
-                      : index < product.averageRating
+                      : index <
+                        averageRating
                       ? "text-yellow-400 fill-yellow-400 opacity-50"
                       : "text-gray-300"
                   }`}
@@ -155,18 +146,17 @@ const ProductDetailPage = () => {
               ))}
             </div>
             <span className="ml-2 text-sm font-medium text-gray-700">
-              {product.averageRating.toFixed(1)}
+              {averageRating?.toFixed(1)}
             </span>
             <span className="mx-2 text-gray-300">•</span>
             <span className="text-sm text-gray-500">
-              {product.ratingCount}{" "}
-              {product.ratingCount === 1 ? "review" : "reviews"}
+              {ratings?.length} {ratings?.length === 1 ? "review" : "reviews"}
             </span>
           </div>
 
           {/* Price */}
           <div className="text-3xl font-bold text-gray-900 mb-6">
-            ${product.price}
+            {formatVND(product.price)}
           </div>
 
           {/* Description */}
@@ -218,16 +208,16 @@ const ProductDetailPage = () => {
           <div className="border-t border-gray-200 pt-6 space-y-4">
             <div>
               <span className="font-medium text-gray-900">Category:</span>{" "}
-              {category ? (
-                <Link
-                  to={`/products/category/${category.id}`}
-                  className="text-blue-600 hover:text-blue-800"
-                >
-                  {category.name}
-                </Link>
-              ) : (
-                "Loading..."
-              )}
+              <Link
+                to={`/products/category/${product.category.id}`}
+                className="text-blue-600 hover:text-blue-800"
+              >
+                {product.category.name}
+              </Link>
+            </div>
+            <div>
+              <span className="font-medium text-gray-900">Quantity: </span>
+              {product.quantity}
             </div>
             <div>
               <span className="font-medium text-gray-900">Added:</span>{" "}
@@ -254,7 +244,7 @@ const ProductDetailPage = () => {
             {user ? (
               <div className="mb-10">
                 <h3 className="text-lg font-semibold mb-4">Write a Review</h3>
-                <ProductRatingForm productId={productId!} userId={user.id} />
+                <ProductRatingForm productId={productId!}/>
               </div>
             ) : (
               <div className="mb-10 bg-gray-50 p-6 rounded-lg">

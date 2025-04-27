@@ -3,6 +3,7 @@ import { ShoppingCart, Star } from "lucide-react";
 import type { Product } from "../../types/Product";
 import { useCart } from "../../hooks/useCart";
 import Button from "../ui/CustomButton";
+import { formatVND } from "@/helpers/formatCurrency";
 
 interface ProductCardProps {
   product: Product;
@@ -16,12 +17,6 @@ const ProductCard = ({ product }: ProductCardProps) => {
     e.stopPropagation();
     addToCart(product, 1);
   };
-
-  // Format price with commas for thousands
-  const formattedPrice = new Intl.NumberFormat("en-US", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(product.price);
 
   return (
     <Link
@@ -72,8 +67,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
         {/* Price and Add to Cart */}
         <div className="mt-auto pt-3 flex justify-between items-center border-t border-gray-100">
           <div className="font-bold text-gray-900 text-lg">
-            {formattedPrice}
-            <span className="text-sm font-normal text-gray-500 mr-1">đ</span>
+            {formatVND(product.price)}
           </div>
           <Button
             size="sm"

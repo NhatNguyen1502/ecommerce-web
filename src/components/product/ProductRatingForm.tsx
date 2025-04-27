@@ -3,31 +3,36 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Star } from "lucide-react";
 import { addProductRating } from "../../api/productService";
 import Button from "../ui/CustomButton";
+import { ProductRatingPayload } from "@/types/Product";
+import toast from "react-hot-toast";
+import { PRODUCT, PRODUCT_RATINGS } from "@/constants/queryKeys";
 
 interface ProductRatingFormProps {
   productId: string;
-  userId: string;
 }
 
-const ProductRatingForm = ({ productId, userId }: ProductRatingFormProps) => {
+const ProductRatingForm = ({ productId }: ProductRatingFormProps) => {
   const [rating, setRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
   const [comment, setComment] = useState("");
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
-    mutationFn: addProductRating,
-    onSuccess: () => {
-      // Invalidate the cache to refresh the data
-      queryClient.invalidateQueries({
-        queryKey: ["productRatings", productId],
-      });
-      queryClient.invalidateQueries({ queryKey: ["product", productId] });
+    mutationFn: (data: ProductRatingPayload) =>
+      addProductRating(productId, data, () => {
+        // Invalidate the cache to refresh the data
+        queryClient.invalidateQueries({
+          queryKey: [PRODUCT_RATINGS, productId],
+        });
+        queryClient.invalidateQueries({ queryKey: [PRODUCT, productId] });
 
-      // Reset form
-      setRating(0);
-      setComment("");
-    },
+        // Reset form
+        setRating(0);
+        setComment("");
+      },
+      (error) => {
+        toast.error(error.message);
+      },)
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -38,10 +43,8 @@ const ProductRatingForm = ({ productId, userId }: ProductRatingFormProps) => {
     }
 
     mutation.mutate({
-      productId,
-      userId,
       rating,
-      comment: comment.trim() || undefined,
+      content: comment.trim() || undefined,
     });
   };
 
@@ -119,3 +122,4 @@ const ProductRatingForm = ({ productId, userId }: ProductRatingFormProps) => {
 };
 
 export default ProductRatingForm;
+
