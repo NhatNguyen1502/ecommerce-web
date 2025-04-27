@@ -1,21 +1,47 @@
-import { useState, useEffect } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { useState } from "react";
+import { useInfiniteQuery } from "@tanstack/react-query";
+import { useNavigate, useParams } from "react-router-dom";
 import { Filter } from "lucide-react";
-import LoadingSpinner from "../components/ui/LoadingSpinner";
-import ProductCard from "../components/product/ProductCard";
 import Button from "../components/ui/CustomButton";
-import { CATEGORIES } from "@/constants/queryKeys";
-import { Category } from "@/types/Category";
+import { useApp } from "@/hooks/useApp";
+import { PRODUCTS } from "@/constants/queryKeys";
+import { getProducts } from "@/api/productService";
+import { useInfiniteScroll } from "@/hooks/UseInfiniteScrollOptions";
+import LoadingSpinner from "@/components/ui/LoadingSpinner";
+import ProductCard from "@/components/product/ProductCard";
+import { getProductByCategory } from "@/api/categoryService";
 
 const ProductsPage = () => {
   const { categoryId } = useParams();
-  const queryClient = useQueryClient();
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const navigate = useNavigate();
 
-  const categories =
-    (queryClient.getQueryState([CATEGORIES])?.data as Category[]) || [];
+  const { categories } = useApp();
+
+  const {
+    data: productsData,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isLoading,
+  } = useInfiniteQuery({
+    queryKey: [PRODUCTS, categoryId],
+    queryFn: ({ pageParam = 0 }) => categoryId ? getProductByCategory(categoryId, pageParam, 9) : getProducts(pageParam, 9),
+    getNextPageParam: (lastPage) =>
+      lastPage.currentPage < lastPage.totalPages - 1
+        ? lastPage.currentPage + 1
+        : undefined,
+    initialPageParam: 0,
+  });
+
+  const products = productsData?.pages.flatMap((page) => page.content) || [];
+
+  // Use our custom hook for infinite scrolling
+  const { observerTarget } = useInfiniteScroll({
+    hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage,
+  });
 
   const handleCategoryFilterChange = (categoryId: string) => {
     if (categoryId === "") navigate("/products");
@@ -90,27 +116,29 @@ const ProductsPage = () => {
         </div>
 
         {/* Product Grid */}
-        {/* <div className="flex-1">
+        <div className="flex-1">
           {isLoading ? (
             <LoadingSpinner className="py-12" />
           ) : products && products.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {products.map((product) => (
-                <ProductCard key={product.id} product={product} />
-              ))}
-            </div>
+            <>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {products.map((product) => (
+                  <ProductCard key={product.id} product={product} />
+                ))}
+              </div>
+              {/* Loading indicator and observer target */}
+              <div ref={observerTarget} className="mt-8 flex justify-center">
+                {isFetchingNextPage && <LoadingSpinner />}
+              </div>
+            </>
           ) : (
             <div className="bg-white rounded-lg shadow-sm p-12 text-center">
               <h3 className="text-lg font-medium text-gray-900 mb-2">
                 No products found
               </h3>
-              <p className="text-gray-600 mb-6">
-                Try adjusting your search or filter criteria.
-              </p>
-              <Button onClick={clearFilters}>Clear all filters</Button>
             </div>
           )}
-        </div> */}
+        </div>
       </div>
     </div>
   );

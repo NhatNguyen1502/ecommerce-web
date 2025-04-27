@@ -51,10 +51,10 @@ export const deleteCategory = async (id: string, onSuccess: () => void, onError:
   });
 }
 
-export const getProductByCategory = async (id: string) => {
+export const getProductByCategory = async (id: string, page: number, size: number) => {
   const res = await request({
     method: "get",
-    url: `/api/categories/${id}/products`,
+    url: `/api/categories/${id}/products?page=${page}&size=${size}`,
   });
 
   return {
