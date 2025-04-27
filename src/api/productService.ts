@@ -33,13 +33,18 @@ export const getProductById = async (id: string): Promise<Product> => {
   return product;
 };
 
-export const getFeaturedProducts = async () => {
+export const getFeaturedProducts = async (page: number, size: number) => {
     const res = await request({
       method: "get",
-      url: "/api/products/featured",
+      url: `/api/products/featured?page=${page}&size=${size}`,
     });
 
-    return res.data.content as Product[];
+    return {
+      content: res.data.content as Product[],
+      totalPages: res.data.totalPages,
+      totalElements: res.data.totalElements,
+      currentPage: res.data.currentPage || page,
+    };
 };
 
 export const getProductRatings = async (productId: string): Promise<ProductRating[]> => {

@@ -66,7 +66,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
           name: product.name,
           price: product.price,
           quantity,
-          image: product.images[0],
+          image: product.imageUrl,
         };
         updatedItems = [...prevCart.items, newItem];
       }

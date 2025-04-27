@@ -170,7 +170,7 @@ const AdminProducts = () => {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap w-[10%]">
                         <div className="text-sm text-gray-900">
-                          ${product.price.toFixed(2)}
+                          {product.price}đ
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap w-[10%]">

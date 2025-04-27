@@ -90,7 +90,7 @@ const CartPage = () => {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-gray-900">
-                          ${item.price.toFixed(2)}
+                          ${item.price}
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
@@ -119,7 +119,7 @@ const CartPage = () => {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-gray-900 font-medium">
-                          ${(item.price * item.quantity).toFixed(2)}
+                          ${(item.price * item.quantity)}
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
@@ -162,7 +162,7 @@ const CartPage = () => {
               <div className="flex justify-between">
                 <span className="text-gray-600">Subtotal</span>
                 <span className="text-gray-900">
-                  ${cart.totalAmount.toFixed(2)}
+                  ${cart.totalAmount}
                 </span>
               </div>
               <div className="flex justify-between">
@@ -174,7 +174,7 @@ const CartPage = () => {
                   Total
                 </span>
                 <span className="text-lg font-semibold text-gray-900">
-                  ${cart.totalAmount.toFixed(2)}
+                  ${cart.totalAmount}
                 </span>
               </div>
             </div>

@@ -1,3 +1,4 @@
+import { Product } from "@/types/Product";
 import { Category, CreateCategoryPayload, UpdateCategoryPayload } from "../types/Category";
 import request from "../utils/Axiosconfig";
 import { categories } from "./mockData";
@@ -50,3 +51,16 @@ export const deleteCategory = async (id: string, onSuccess: () => void, onError:
   });
 }
 
+export const getProductByCategory = async (id: string) => {
+  const res = await request({
+    method: "get",
+    url: `/api/categories/${id}/products`,
+  });
+
+  return {
+    content: res.data.content as Product[],
+    totalPages: res.data.totalPages,
+    totalElements: res.data.totalElements,
+    currentPage: res.data.currentPage,
+  };
+};
