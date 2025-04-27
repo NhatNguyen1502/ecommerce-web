@@ -23,6 +23,7 @@ const ProductModal = ({ product, onClose }: ProductModalProps) => {
           name: product.name,
           description: product.description,
           price: product.price,
+          quantity: product.quantity,
           categoryId: product.category.id,
           isFeatured: product.isFeatured,
         }
@@ -55,6 +56,7 @@ const ProductModal = ({ product, onClose }: ProductModalProps) => {
       watchedFields.name !== product.name ||
         watchedFields.description !== product.description ||
         Number(watchedFields.price) !== product.price ||
+        Number(watchedFields.quantity) !== product.quantity ||
         watchedFields.categoryId !== product.category.id ||
         watchedFields.isFeatured !== product.isFeatured
     );
@@ -122,6 +124,7 @@ const ProductModal = ({ product, onClose }: ProductModalProps) => {
       name: data.name,
       description: data.description,
       price: data.price,
+      quantity: data.quantity,
       categoryId: data.categoryId,
       isFeatured: data.isFeatured,
     };
@@ -218,6 +221,24 @@ const ProductModal = ({ product, onClose }: ProductModalProps) => {
                     step="0.01"
                     required
                     {...register("price", { required: true, min: 0 })}
+                    className="block w-full rounded-md border border-gray-300 py-2 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+
+                <div>
+                  <label
+                    htmlFor="quantity"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
+                    Quantity <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="number"
+                    id="quantity"
+                    min="0"
+                    step="1"
+                    required
+                    {...register("quantity", { required: true, min: 0 })}
                     className="block w-full rounded-md border border-gray-300 py-2 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   />
                 </div>
@@ -325,7 +346,7 @@ const ProductModal = ({ product, onClose }: ProductModalProps) => {
             </Button>
             <Button
               type="submit"
-              disabled={mutation.isPending || (Boolean(product && !hasChanges))}
+              disabled={mutation.isPending || Boolean(product && !hasChanges)}
             >
               {mutation.isPending ? (
                 <LoadingSpinner
