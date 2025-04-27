@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ChevronDown } from 'lucide-react';
-import { useQuery } from '@tanstack/react-query';
-import { getCategories } from '../../api/categoryService';
+import { useApp } from '@/hooks/useApp';
 
 interface CategoryMenuProps {
   isMobile?: boolean;
@@ -11,10 +10,8 @@ interface CategoryMenuProps {
 
 const CategoryMenu = ({ isMobile = false, setIsMobileMenuOpen }: CategoryMenuProps) => {
   const [isOpen, setIsOpen] = useState(false);
-  const { data: categories } = useQuery({
-    queryKey: ['categories'],
-    queryFn: getCategories,
-  });
+  
+  const {categories} = useApp();
 
   // Close the dropdown when clicking outside
   useEffect(() => {
