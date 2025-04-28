@@ -1,10 +1,11 @@
 import { UpdateStatusPayload, User } from "@/types/User";
 import request from "@/utils/Axiosconfig";
 
-export const getCustomers = async (page: number, size: number) => {
+export const getCustomers = async (page: number, size: number, onError: (error: any) => void) => {
   const res = await request({
     method: "get",
-    url: `/api/users?page=${page}&size=${size}`,
+    url: `/admin/api/users?page=${page}&size=${size}`,
+    onError,
   });
 
   return {
@@ -18,7 +19,7 @@ export const getCustomers = async (page: number, size: number) => {
 export const deleteCustomer = async (id: string, onSuccess: () => void, onError: (error: any) => void) => {
    await request({
     method: "delete",
-    url: `/api/users/${id}`,
+    url: `/admin/api/users/${id}`,
     onSuccess,
     onError,
   });
@@ -32,7 +33,7 @@ export const updateCustomerStatus = async (
 ) => {
   await request({
     method: "patch",
-    url: `/api/users/${id}/status`,
+    url: `/admin/api/users/${id}/status`,
     data,
     onSuccess,
     onError,

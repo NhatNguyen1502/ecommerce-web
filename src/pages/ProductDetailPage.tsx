@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useLocation, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { Minus, Plus, ShoppingCart, Star, ChevronLeft } from "lucide-react";
 import { getProductById, getProductRatings } from "../api/productService";
@@ -17,6 +17,8 @@ const ProductDetailPage = () => {
   const [quantity, setQuantity] = useState(1);
   const { user } = useAuth();
   const { addToCart } = useCart();
+  const location = useLocation();
+  const navigate = useNavigate();
 
   const { data: product } = useQuery({
     queryKey: [PRODUCT, productId],
@@ -49,6 +51,11 @@ const ProductDetailPage = () => {
       addToCart(product, quantity);
     }
   };
+
+  const handleMoveToLogin = () => {
+    localStorage.setItem("redirectAfterLogin", location.pathname);
+    navigate("/login");
+  }
 
   if (!product) {
     return (
@@ -132,13 +139,9 @@ const ProductDetailPage = () => {
                 <Star
                   key={index}
                   className={`h-5 w-5 ${
-                    index <
-                    Math.floor(
-                      averageRating
-                    )
+                    index < Math.floor(averageRating)
                       ? "text-yellow-400 fill-yellow-400"
-                      : index <
-                        averageRating
+                      : index < averageRating
                       ? "text-yellow-400 fill-yellow-400 opacity-50"
                       : "text-gray-300"
                   }`}
@@ -244,18 +247,18 @@ const ProductDetailPage = () => {
             {user ? (
               <div className="mb-10">
                 <h3 className="text-lg font-semibold mb-4">Write a Review</h3>
-                <ProductRatingForm productId={productId!}/>
+                <ProductRatingForm productId={productId!} />
               </div>
             ) : (
               <div className="mb-10 bg-gray-50 p-6 rounded-lg">
                 <p className="mb-4">
                   Please{" "}
-                  <Link
-                    to="/login"
+                  <button
+                    onClick={handleMoveToLogin}
                     className="text-blue-600 hover:text-blue-800"
                   >
                     login
-                  </Link>{" "}
+                  </button>{" "}
                   to leave a review.
                 </p>
               </div>

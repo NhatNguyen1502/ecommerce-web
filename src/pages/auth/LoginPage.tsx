@@ -30,7 +30,9 @@ const LoginPage = () => {
           if (data.user.role === UserRole.ADMIN) {
             navigate("/admin");
           } else {
-            navigate("/");
+            const from = localStorage.getItem("redirectAfterLogin") || "/";
+            navigate(from, { replace: true });
+            localStorage.removeItem("redirectAfterLogin");
           }
         },
         (error) => {
@@ -123,3 +125,4 @@ const LoginPage = () => {
 };
 
 export default LoginPage;
+

@@ -7,47 +7,47 @@ import LoadingSpinner from '../../components/ui/LoadingSpinner';
 
 const AdminDashboard = () => {
 
-  const { data: products, isLoading: productsLoading } = useQuery({
-    queryKey: ['products'],
-    queryFn: () => getProducts(),
-  });
+  // const { data: products, isLoading: productsLoading } = useQuery({
+  //   queryKey: ['products'],
+  //   queryFn: () => getProducts(),
+  // });
 
-  const { data: categories, isLoading: categoriesLoading } = useQuery({
-    queryKey: ['categories'],
-    queryFn: getCategories,
-  });
+  // const { data: categories, isLoading: categoriesLoading } = useQuery({
+  //   queryKey: ['categories'],
+  //   queryFn: getCategories,
+  // });
 
-  const stats = [
-    {
-      name: 'Total Products',
-      value: products?.length || 0,
-      icon: <ShoppingBag className="h-6 w-6 text-blue-600" />,
-      change: '+12%',
-      isPositive: true,
-    },
-    {
-      name: 'Categories',
-      value: categories?.length || 0,
-      icon: <Tag className="h-6 w-6 text-green-600" />,
-      change: '+5%',
-      isPositive: true,
-    },
-    {
-      name: 'Customers',
-      value: 9,
-      icon: <Users className="h-6 w-6 text-purple-600" />,
-      change: '+18%',
-      isPositive: true,
-    },
-  ];
+  // const stats = [
+  //   {
+  //     name: 'Total Products',
+  //     value: products?.length || 0,
+  //     icon: <ShoppingBag className="h-6 w-6 text-blue-600" />,
+  //     change: '+12%',
+  //     isPositive: true,
+  //   },
+  //   {
+  //     name: 'Categories',
+  //     value: categories?.length || 0,
+  //     icon: <Tag className="h-6 w-6 text-green-600" />,
+  //     change: '+5%',
+  //     isPositive: true,
+  //   },
+  //   {
+  //     name: 'Customers',
+  //     value: 9,
+  //     icon: <Users className="h-6 w-6 text-purple-600" />,
+  //     change: '+18%',
+  //     isPositive: true,
+  //   },
+  // ];
 
-  if (productsLoading || categoriesLoading) {
-    return (
-      <AdminLayout>
-        <LoadingSpinner className="py-16" />
-      </AdminLayout>
-    );
-  }
+  // if (productsLoading || categoriesLoading) {
+  //   return (
+  //     <AdminLayout>
+  //       <LoadingSpinner className="py-16" />
+  //     </AdminLayout>
+  //   );
+  // }
 
   return (
     <AdminLayout>
@@ -57,7 +57,7 @@ const AdminDashboard = () => {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+      {/* <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
         {stats.map((stat, i) => (
           <div key={i} className="bg-white rounded-lg shadow-sm p-6">
             <div className="flex items-center justify-between mb-2">
@@ -69,7 +69,7 @@ const AdminDashboard = () => {
             </div>
           </div>
         ))}
-      </div>
+      </div> */}
     </AdminLayout>
   );
 };

@@ -1,5 +1,9 @@
 import { Product } from "@/types/Product";
-import { Category, CreateCategoryPayload, UpdateCategoryPayload } from "../types/Category";
+import {
+  Category,
+  CreateCategoryPayload,
+  UpdateCategoryPayload,
+} from "../types/Category";
 import request from "../utils/Axiosconfig";
 import { categories } from "./mockData";
 
@@ -22,36 +26,53 @@ export const getCategoryById = async (id: string): Promise<Category> => {
   return category;
 };
 
-export const postCategory = async (data: CreateCategoryPayload, onSuccess: () => void, onError: (error: any) => void) => {
+export const createCategory = async (
+  data: CreateCategoryPayload,
+  onSuccess: () => void,
+  onError: (error: any) => void
+) => {
   await request({
     method: "post",
-    url: "/api/categories",
+    url: "/admin/api/categories",
     data,
     onSuccess,
     onError,
   });
-}
+};
 
-export const putCategory = async (id: string, data: UpdateCategoryPayload, onSuccess: () => void, onError: (error: any) => void) => {
+export const updateCategory = async (
+  id: string,
+  data: UpdateCategoryPayload,
+  onSuccess: () => void,
+  onError: (error: any) => void
+) => {
   await request({
     method: "put",
-    url: `/api/categories/${id}`,
+    url: `/admin/api/categories/${id}`,
     data,
     onSuccess,
     onError,
-  })
-}
+  });
+};
 
-export const deleteCategory = async (id: string, onSuccess: () => void, onError: (error: any) => void) => {
+export const deleteCategory = async (
+  id: string,
+  onSuccess: () => void,
+  onError: (error: any) => void
+) => {
   await request({
     method: "delete",
-    url: `/api/categories/${id}`,
+    url: `/admin/api/categories/${id}`,
     onSuccess,
     onError,
   });
-}
+};
 
-export const getProductByCategory = async (id: string, page: number, size: number) => {
+export const getProductByCategory = async (
+  id: string,
+  page: number,
+  size: number
+) => {
   const res = await request({
     method: "get",
     url: `/api/categories/${id}/products?page=${page}&size=${size}`,
