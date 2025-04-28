@@ -1,5 +1,4 @@
 import axios, { AxiosRequestConfig } from 'axios';
-import toast from 'react-hot-toast';
 
 const httpClient = axios.create({
   baseURL: import.meta.env.VITE_BASE_SERVER_URL,
@@ -57,6 +56,7 @@ httpClient.interceptors.response.use(
       // Nếu không có refresh token, logout ngay
       if (!refreshToken) {
         localStorage.removeItem('accessToken');
+        localStorage.removeItem('user');
         // error('Session expired. Please log in again.');
         window.location.href = '/login';
         return Promise.reject(error);
@@ -67,6 +67,7 @@ httpClient.interceptors.response.use(
         isRefreshing = false;
         localStorage.removeItem('accessToken');
         localStorage.removeItem('refreshToken');
+        localStorage.removeItem("user");
         window.location.href = '/login';
         return Promise.reject(error);
       }
@@ -80,10 +81,11 @@ httpClient.interceptors.response.use(
             refreshToken,
           });
 
-          // Điều chỉnh theo cấu trúc response thực tế của bạn (ví dụ: data.access_token)
+          console.log("refresh response:", refreshResponse.data)
+
           const newAccessToken =
-            refreshResponse?.data?.data?.access_token ||
-            refreshResponse?.data?.access_token;
+            refreshResponse?.data?.data?.accessToken ||
+            refreshResponse?.data?.accessToken;
           if (!newAccessToken) {
             throw new Error('No access token in refresh response');
           }
@@ -100,6 +102,7 @@ httpClient.interceptors.response.use(
           isRefreshing = false;
           localStorage.removeItem('accessToken');
           localStorage.removeItem('refreshToken');
+          localStorage.removeItem("user");
           // error('Session expired. Please log in again.');
           window.location.href = '/login';
           return Promise.reject(refreshError);
@@ -114,9 +117,10 @@ httpClient.interceptors.response.use(
         });
       }
     } else if (error.response?.status === 403) {
-      toast.error(error.response?.data?.message || 'Access denied.');
-      // error('Session expired. Please log in again.');
-      // window.location.href = '/login';
+       return Promise.reject({
+         code: error.response?.status,
+         message: error.response?.data?.message || "Access denied",
+       });
     }
     console.log(error);
 
@@ -160,7 +164,6 @@ const request = async ({
       onError(error.response?.data);
     } else {
       onError(error);
-      // error(error.message);
     }
     throw error; // Ném lỗi để caller có thể xử lý nếu cần
   }

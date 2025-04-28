@@ -111,12 +111,6 @@ const ProductRatingForm = ({ productId }: ProductRatingFormProps) => {
           Thank you for your review!
         </div>
       )}
-
-      {mutation.isError && (
-        <div className="mt-4 p-3 bg-red-50 text-red-800 rounded-md">
-          Error submitting review. Please try again.
-        </div>
-      )}
     </form>
   );
 };

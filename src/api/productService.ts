@@ -2,7 +2,7 @@ import { Product, ProductRating, ProductRatingPayload } from '../types/Product';
 
 import request from "../utils/Axiosconfig";
 
-export const getProducts = async (page: number, size: number) => {
+export const getProducts = async (page: number = 0, size: number = 10) => {
   const res = await request({
     method: "get",
     url: `/api/products?page=${page}&size=${size}`,
@@ -51,7 +51,7 @@ export const getProductRatings = async (productId: string) => {
 export const createProduct = async (data: FormData, onSuccess: () => void, onError: (error: any) => void) => {
   await request({
     method: "post",
-    url: "/api/products",
+    url: "/admin/api/products",
     data,
     onSuccess,
     onError,
@@ -66,7 +66,7 @@ export const updateProduct = async (
 ) => {
   await request({
     method: "put",
-    url: "/api/products/" + id,
+    url: "/admin/api/products/" + id,
     data,
     onSuccess,
     onError,
@@ -80,7 +80,7 @@ export const deleteProduct = async (
 ) => {
   await request({
     method: "delete",
-    url: `/api/products/${id}`,
+    url: `/admin/api/products/${id}`,
     onSuccess,
     onError,
   });
@@ -94,7 +94,7 @@ export const addProductRating = async (
 ) => {
   await request({
     method: "post",
-    url: `/api/products/${id}/reviews`,
+    url: `/customer/api/products/${id}/reviews`,
     data,
     onSuccess,
     onError,

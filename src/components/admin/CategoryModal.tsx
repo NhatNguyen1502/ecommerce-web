@@ -7,7 +7,7 @@ import {
 import Button from "../ui/CustomButton";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { postCategory, putCategory } from "../../api/categoryService";
+import { createCategory, updateCategory } from "../../api/categoryService";
 import toast from "react-hot-toast";
 import { CATEGORIES } from "../../constants/queryKeys";
 import LoadingSpinner from "../ui/LoadingSpinner";
@@ -24,7 +24,7 @@ const CategoryModal = ({ category, onClose }: CategoryModalProps) => {
   const mutation = useMutation({
     mutationFn: category
       ? (data: UpdateCategoryPayload) =>
-          putCategory(
+          updateCategory(
             category.id,
             data,
             () => {
@@ -37,7 +37,7 @@ const CategoryModal = ({ category, onClose }: CategoryModalProps) => {
             }
           )
       : (data: CreateCategoryPayload) =>
-          postCategory(
+          createCategory(
             data,
             () => {
               queryClient.invalidateQueries({ queryKey: [CATEGORIES] });
@@ -108,5 +108,3 @@ const CategoryModal = ({ category, onClose }: CategoryModalProps) => {
 };
 
 export default CategoryModal;
-
-

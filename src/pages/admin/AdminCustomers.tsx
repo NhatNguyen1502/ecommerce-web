@@ -13,9 +13,11 @@ import { DeleteButton } from "@/components/admin/DeleteButton";
 import toast from "react-hot-toast";
 import PageSizeSelector from "@/components/ui/PageSizeSelector";
 import StatusToggle from "@/components/admin/StatusToggle";
+import { useNavigate } from "react-router-dom";
 
 const AdminCustomers = () => {
   const [searchTerm, setSearchTerm] = useState("");
+  let navigate = useNavigate();
 
   const queryClient = useQueryClient();
 
@@ -24,7 +26,10 @@ const AdminCustomers = () => {
 
   const { data: customersData, isLoading } = useQuery({
     queryKey: [CUSTOMERS, page, pageSize],
-    queryFn: () => getCustomers(page, pageSize),
+    queryFn: () => getCustomers(page, pageSize, (error) => { 
+      toast.error(error.message);
+      navigate("/login");
+    }),
   });
 
   const customers = customersData?.content || [];
