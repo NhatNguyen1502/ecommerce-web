@@ -2,11 +2,28 @@ import { Link } from "react-router-dom";
 import { Trash2, Plus, Minus, ShoppingBag } from "lucide-react";
 import { useCart } from "../hooks/useCart";
 import Button from "../components/ui/CustomButton";
+import { useQuery } from "@tanstack/react-query";
+import { getCartItems } from "@/api/cartService";
+import { formatVND } from "@/helpers/formatCurrency";
+import { CART_ITEM } from "@/constants/queryKeys";
+import { useMemo } from "react";
 
 const CartPage = () => {
-  const { cart, removeFromCart, updateQuantity, clearCart } = useCart();
+  const { removeFromCart, updateQuantity, clearCart } = useCart();
 
-  if (cart.items.length === 0) {
+    const { data: cartItems } = useQuery({
+      queryKey: [CART_ITEM],
+      queryFn: () => getCartItems(),
+    });
+
+  const totalAmount = useMemo(() => {
+  return cartItems?.reduce(
+    (total, item) => total + item.price * item.quantity,
+    0
+  ) || 0;
+}, [cartItems]);
+
+  if (!cartItems?.length) {
     return (
       <div className="text-center py-16">
         <div className="inline-flex justify-center items-center w-16 h-16 rounded-full bg-gray-100 mb-6">
@@ -67,14 +84,14 @@ const CartPage = () => {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {cart.items.map((item) => (
-                    <tr key={item.id}>
+                  {cartItems?.map((item) => (
+                    <tr key={item.productId}>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
                           <div className="h-16 w-16 flex-shrink-0 overflow-hidden rounded-md border border-gray-200">
                             <img
-                              src={item.image}
-                              alt={item.name}
+                              src={item.imageUrl}
+                              alt={item.productName}
                               className="h-full w-full object-cover object-center"
                             />
                           </div>
@@ -83,14 +100,14 @@ const CartPage = () => {
                               to={`/products/${item.productId}`}
                               className="text-gray-900 font-medium hover:text-blue-600"
                             >
-                              {item.name}
+                              {item.productName}
                             </Link>
                           </div>
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-gray-900">
-                          ${item.price}
+                          {formatVND(item.price)}
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
@@ -119,7 +136,7 @@ const CartPage = () => {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-gray-900 font-medium">
-                          ${(item.price * item.quantity)}
+                          {formatVND(item.price * item.quantity)}
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
@@ -162,7 +179,7 @@ const CartPage = () => {
               <div className="flex justify-between">
                 <span className="text-gray-600">Subtotal</span>
                 <span className="text-gray-900">
-                  ${cart.totalAmount}
+                  {formatVND(totalAmount)}
                 </span>
               </div>
               <div className="flex justify-between">
@@ -174,7 +191,7 @@ const CartPage = () => {
                   Total
                 </span>
                 <span className="text-lg font-semibold text-gray-900">
-                  ${cart.totalAmount}
+                  {formatVND(totalAmount)}
                 </span>
               </div>
             </div>

@@ -5,7 +5,6 @@ import {
   UpdateCategoryPayload,
 } from "../types/Category";
 import request from "../utils/Axiosconfig";
-import { categories } from "./mockData";
 
 export const getCategories = async () => {
   const res = await request({
@@ -14,16 +13,6 @@ export const getCategories = async () => {
   });
 
   return res.data as Category[];
-};
-
-export const getCategoryById = async (id: string): Promise<Category> => {
-  const category = categories.find((c) => c.id === id);
-
-  if (!category) {
-    throw new Error("Category not found");
-  }
-
-  return category;
 };
 
 export const createCategory = async (

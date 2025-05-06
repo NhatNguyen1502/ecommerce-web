@@ -1,24 +1,30 @@
-import { useState } from 'react';
-import { Link, NavLink, useNavigate } from 'react-router-dom';
-import { Smartphone, ShoppingCart, Menu, X, User, LogOut } from 'lucide-react';
-import { useAuth } from '../../hooks/useAuth';
-import { useCart } from '../../hooks/useCart';
-import CategoryMenu from '../category/CategoryMenu';
+import { useState } from "react";
+import { Link, NavLink, useNavigate } from "react-router-dom";
+import { Smartphone, ShoppingCart, Menu, X, User, LogOut } from "lucide-react";
+import { useAuth } from "../../hooks/useAuth";
+import CategoryMenu from "../category/CategoryMenu";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { getCartItemCount } from "@/api/cartService";
+import { CART_ITEM_COUNT } from "@/constants/queryKeys";
 
 const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const { user, setUser } = useAuth();
-  const { totalItems } = useCart();
   const navigate = useNavigate();
 
+  const { data: totalItems } = useQuery({
+    queryKey: [CART_ITEM_COUNT],
+    queryFn: () => getCartItemCount(),
+  });
+
   const handleLogout = () => {
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('refreshToken');
-    localStorage.removeItem('user');
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("refreshToken");
+    localStorage.removeItem("user");
     setUser(null);
     setIsProfileOpen(false);
-    navigate('/login');
+    navigate("/login");
   };
 
   return (
@@ -34,10 +40,12 @@ const Header = () => {
           {/* Desktop Navigation */}
           <nav className="hidden md:flex space-x-8">
             <CategoryMenu />
-            <NavLink 
-              to="/products" 
-              className={({ isActive }) => 
-                `text-gray-700 hover:text-blue-600 ${isActive ? 'font-medium text-blue-600' : ''}`
+            <NavLink
+              to="/products"
+              className={({ isActive }) =>
+                `text-gray-700 hover:text-blue-600 ${
+                  isActive ? "font-medium text-blue-600" : ""
+                }`
               }
             >
               All Products
@@ -48,26 +56,26 @@ const Header = () => {
           <div className="hidden md:flex items-center space-x-6">
             {user ? (
               <div className="relative">
-                <button 
+                <button
                   className="flex items-center text-gray-700 hover:text-blue-600"
                   onClick={() => setIsProfileOpen(!isProfileOpen)}
                 >
                   <User className="h-5 w-5 mr-1" />
                   <span>{user.email}</span>
                 </button>
-                
+
                 {isProfileOpen && (
                   <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-10">
-                    {user.role === 'admin' && (
-                      <Link 
-                        to="/admin" 
+                    {user.role === "admin" && (
+                      <Link
+                        to="/admin"
                         className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                         onClick={() => setIsProfileOpen(false)}
                       >
                         Admin Dashboard
                       </Link>
                     )}
-                    <button 
+                    <button
                       className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                       onClick={handleLogout}
                     >
@@ -82,7 +90,7 @@ const Header = () => {
                 Login
               </Link>
             )}
-            
+
             <Link to="/cart" className="relative">
               <ShoppingCart className="h-6 w-6 text-gray-700 hover:text-blue-600" />
               {totalItems > 0 && (
@@ -94,15 +102,11 @@ const Header = () => {
           </div>
 
           {/* Mobile menu button */}
-          <button 
+          <button
             className="md:hidden text-gray-700"
             onClick={() => setIsOpen(!isOpen)}
           >
-            {isOpen ? (
-              <X className="h-6 w-6" />
-            ) : (
-              <Menu className="h-6 w-6" />
-            )}
+            {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
           </button>
         </div>
       </div>
@@ -111,19 +115,23 @@ const Header = () => {
       {isOpen && (
         <div className="md:hidden bg-white shadow-lg">
           <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-            <NavLink 
-              to="/" 
-              className={({ isActive }) => 
-                `block px-3 py-2 rounded-md ${isActive ? 'bg-blue-50 text-blue-600' : 'text-gray-700'}`
+            <NavLink
+              to="/"
+              className={({ isActive }) =>
+                `block px-3 py-2 rounded-md ${
+                  isActive ? "bg-blue-50 text-blue-600" : "text-gray-700"
+                }`
               }
               onClick={() => setIsOpen(false)}
             >
               Home
             </NavLink>
-            <NavLink 
-              to="/products" 
-              className={({ isActive }) => 
-                `block px-3 py-2 rounded-md ${isActive ? 'bg-blue-50 text-blue-600' : 'text-gray-700'}`
+            <NavLink
+              to="/products"
+              className={({ isActive }) =>
+                `block px-3 py-2 rounded-md ${
+                  isActive ? "bg-blue-50 text-blue-600" : "text-gray-700"
+                }`
               }
               onClick={() => setIsOpen(false)}
             >
@@ -134,23 +142,23 @@ const Header = () => {
             </div>
             {user ? (
               <>
-                {user.role === 'admin' && (
-                  <Link 
-                    to="/admin" 
+                {user.role === "admin" && (
+                  <Link
+                    to="/admin"
                     className="block px-3 py-2 rounded-md text-gray-700"
                     onClick={() => setIsOpen(false)}
                   >
                     Admin Dashboard
                   </Link>
                 )}
-                <Link 
-                  to="/cart" 
+                <Link
+                  to="/cart"
                   className="block px-3 py-2 rounded-md text-gray-700"
                   onClick={() => setIsOpen(false)}
                 >
                   Cart ({totalItems})
                 </Link>
-                <button 
+                <button
                   className="block w-full text-left px-3 py-2 rounded-md text-gray-700"
                   onClick={() => {
                     handleLogout();
@@ -162,15 +170,15 @@ const Header = () => {
               </>
             ) : (
               <>
-                <Link 
-                  to="/login" 
+                <Link
+                  to="/login"
                   className="block px-3 py-2 rounded-md text-gray-700"
                   onClick={() => setIsOpen(false)}
                 >
                   Login
                 </Link>
-                <Link 
-                  to="/register" 
+                <Link
+                  to="/register"
                   className="block px-3 py-2 rounded-md text-gray-700"
                   onClick={() => setIsOpen(false)}
                 >
@@ -186,3 +194,5 @@ const Header = () => {
 };
 
 export default Header;
+
+

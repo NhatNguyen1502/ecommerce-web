@@ -1,13 +1,23 @@
 export interface CartItem {
-  id: string;
   productId: string;
-  name: string;
+  productName: string;
   price: number;
   quantity: number;
-  image: string;
+  imageUrl: string;
 }
 
 export interface Cart {
   items: CartItem[];
   totalAmount: number;
+}
+
+export interface AddToCartPayload {
+  productId: string;
+  quantity: number;
+}
+
+export interface UpdateCartItemPayload {
+  productId: string;
+
+
 }
