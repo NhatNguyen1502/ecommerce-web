@@ -1,21 +1,38 @@
 import { Link } from "react-router-dom";
-import { ShoppingCart, Star } from "lucide-react";
+import { ShoppingCart, Star, AlertCircle } from "lucide-react";
 import type { Product } from "../../types/Product";
-import { useCart } from "../../hooks/useCart";
 import Button from "../ui/CustomButton";
 import { formatVND } from "@/helpers/formatCurrency";
+import { addToCart } from "@/api/cartService";
+import toast from "react-hot-toast";
+import { useQueryClient } from "@tanstack/react-query";
+import { CART_ITEM_COUNT } from "@/constants/queryKeys";
 
 interface ProductCardProps {
   product: Product;
 }
 
 const ProductCard = ({ product }: ProductCardProps) => {
-  const { addToCart } = useCart();
+  const isOutOfStock = product.quantity <= 0;
+  const queryClient = useQueryClient();
+
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    addToCart(product, 1);
+    if (!isOutOfStock) {
+      const productPayload = { productId: product.id, quantity: 1 };
+      addToCart(
+        productPayload,
+        () => {
+          toast.success("Product added to cart");
+          queryClient.invalidateQueries({ queryKey: [CART_ITEM_COUNT] });
+        },
+        (error) => {
+          toast.error(error.response.data.message);
+        }
+      );
+    }
   };
 
   return (
@@ -38,6 +55,13 @@ const ProductCard = ({ product }: ProductCardProps) => {
       {product.isFeatured && (
         <div className="absolute top-3 left-0 bg-gradient-to-r from-blue-600 to-blue-500 text-white text-xs font-medium px-3 py-1 rounded-r-full shadow-sm">
           Featured
+        </div>
+      )}
+
+      {/* Out of Stock Badge */}
+      {isOutOfStock && (
+        <div className="absolute top-3 right-0 bg-red-500 text-white text-xs font-medium px-3 py-1 rounded-l-full shadow-sm">
+          Out of Stock
         </div>
       )}
 
@@ -64,6 +88,23 @@ const ProductCard = ({ product }: ProductCardProps) => {
           </span>
         </div>
 
+        {/* Quantity Indicator */}
+        <div className="mb-3 flex items-center">
+          <span className="text-sm text-gray-600">
+            {isOutOfStock ? (
+              <span className="flex items-center text-red-500">
+                <AlertCircle className="h-3.5 w-3.5 mr-1" />
+                Out of stock
+              </span>
+            ) : (
+              <span>
+                In stock:{" "}
+                <span className="font-medium">{product.quantity}</span>
+              </span>
+            )}
+          </span>
+        </div>
+
         {/* Price and Add to Cart */}
         <div className="mt-auto pt-3 flex justify-between items-center border-t border-gray-100">
           <div className="font-bold text-gray-900 text-lg">
@@ -72,11 +113,16 @@ const ProductCard = ({ product }: ProductCardProps) => {
           <Button
             size="sm"
             onClick={handleAddToCart}
-            aria-label="Add to cart"
-            className="flex items-center rounded-full hover:shadow-md transition-all duration-300"
+            aria-label={isOutOfStock ? "Out of stock" : "Add to cart"}
+            className={`flex items-center rounded-full transition-all duration-300 ${
+              isOutOfStock
+                ? "bg-gray-200 text-gray-400 cursor-not-allowed hover:bg-gray-200"
+                : "hover:shadow-md"
+            }`}
+            disabled={isOutOfStock}
           >
             <ShoppingCart className="h-4 w-4 mr-1.5" />
-            Add
+            {isOutOfStock ? "Sold Out" : "Add"}
           </Button>
         </div>
       </div>
