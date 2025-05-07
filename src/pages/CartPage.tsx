@@ -1,20 +1,19 @@
 import { Link } from "react-router-dom";
-import { Trash2, Plus, Minus, ShoppingBag } from "lucide-react";
-import { useCart } from "../hooks/useCart";
+import { Plus, Minus, ShoppingBag } from "lucide-react";
 import Button from "../components/ui/CustomButton";
-import { useQuery } from "@tanstack/react-query";
-import { getCartItems } from "@/api/cartService";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { getCartItems, updateCartItemQuantity } from "@/api/cartService";
 import { formatVND } from "@/helpers/formatCurrency";
 import { CART_ITEM } from "@/constants/queryKeys";
 import { useMemo } from "react";
+import toast from "react-hot-toast";
 
 const CartPage = () => {
-  const { removeFromCart, updateQuantity, clearCart } = useCart();
-
     const { data: cartItems } = useQuery({
       queryKey: [CART_ITEM],
       queryFn: () => getCartItems(),
     });
+  const queryClient = useQueryClient();
 
   const totalAmount = useMemo(() => {
   return cartItems?.reduce(
@@ -22,6 +21,10 @@ const CartPage = () => {
     0
   ) || 0;
 }, [cartItems]);
+
+  const updateQuantity = ( payload : { productId: string, quantity: number }) => {
+    updateCartItemQuantity(payload, () => queryClient.invalidateQueries({ queryKey: [CART_ITEM] }), (error) => toast.error(error.message))
+  }
 
   if (!cartItems?.length) {
     return (
@@ -114,9 +117,8 @@ const CartPage = () => {
                         <div className="flex items-center border border-gray-300 rounded">
                           <button
                             onClick={() =>
-                              updateQuantity(item.productId, item.quantity - 1)
+                              updateQuantity({productId: item.productId, quantity: item.quantity - 1})
                             }
-                            disabled={item.quantity <= 1}
                             className="px-2 py-1 text-gray-600 hover:text-gray-800 disabled:opacity-50"
                           >
                             <Minus className="h-4 w-4" />
@@ -126,7 +128,7 @@ const CartPage = () => {
                           </span>
                           <button
                             onClick={() =>
-                              updateQuantity(item.productId, item.quantity + 1)
+                              updateQuantity({productId: item.productId, quantity: item.quantity + 1})
                             }
                             className="px-2 py-1 text-gray-600 hover:text-gray-800"
                           >
@@ -139,14 +141,7 @@ const CartPage = () => {
                           {formatVND(item.price * item.quantity)}
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        <button
-                          onClick={() => removeFromCart(item.productId)}
-                          className="text-red-500 hover:text-red-700"
-                        >
-                          <Trash2 className="h-5 w-5" />
-                        </button>
-                      </td>
+                      
                     </tr>
                   ))}
                 </tbody>
@@ -155,12 +150,6 @@ const CartPage = () => {
 
             {/* Cart Actions */}
             <div className="px-6 py-4 border-t border-gray-200 flex justify-between items-center">
-              <button
-                onClick={clearCart}
-                className="text-sm text-red-600 hover:text-red-800"
-              >
-                Clear Cart
-              </button>
               <Link to="/products">
                 <Button variant="outline">Continue Shopping</Button>
               </Link>
