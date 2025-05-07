@@ -75,7 +75,7 @@ const ProductDetailPage = () => {
 
   const handleAddToCart = () => {
     if (product && !isOutOfStock) {
-      const productPayload = { productId: product.id, quantity: 1 };
+      const productPayload = { productId: product.id, quantity };
       addToCart(
         productPayload,
         () => {

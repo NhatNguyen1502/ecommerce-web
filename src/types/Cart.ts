@@ -18,6 +18,5 @@ export interface AddToCartPayload {
 
 export interface UpdateCartItemPayload {
   productId: string;
-
-
+  quantity: number;
 }

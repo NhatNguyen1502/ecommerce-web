@@ -12,6 +12,7 @@ const Header = () => {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const { user, setUser } = useAuth();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   const { data: totalItems } = useQuery({
     queryKey: [CART_ITEM_COUNT],
@@ -22,6 +23,7 @@ const Header = () => {
     localStorage.removeItem("accessToken");
     localStorage.removeItem("refreshToken");
     localStorage.removeItem("user");
+    queryClient.clear();
     setUser(null);
     setIsProfileOpen(false);
     navigate("/login");

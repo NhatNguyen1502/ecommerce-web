@@ -1,10 +1,8 @@
 import { Link, useLocation } from 'react-router-dom';
 import { LayoutDashboard, Smartphone, Layers, Users, LogOut } from 'lucide-react';
-import { useAuth } from '../../hooks/useAuth';
 
 const AdminSidebar = () => {
   const location = useLocation();
-  const { logout } = useAuth();
   
   const isActive = (path: string) => {
     return location.pathname === path;
@@ -65,13 +63,6 @@ const AdminSidebar = () => {
             <Smartphone className="h-5 w-5" />
             <span className="ml-3">View Store</span>
           </Link>
-          <button
-            onClick={logout}
-            className="w-full flex items-center px-4 py-3 rounded-md text-gray-300 hover:bg-gray-700 hover:text-white transition-colors"
-          >
-            <LogOut className="h-5 w-5" />
-            <span className="ml-3">Logout</span>
-          </button>
         </div>
       </nav>
     </aside>

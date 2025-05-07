@@ -1,4 +1,4 @@
-import { AddToCartPayload, CartItem } from "@/types/Cart";
+import { AddToCartPayload, CartItem, UpdateCartItemPayload } from "@/types/Cart";
 import request from "@/utils/Axiosconfig";
 
 export const addToCart = async (
@@ -42,4 +42,18 @@ export const getCartItems = async () => {
     url: "/customer/api/cart",
   });
   return res.data as CartItem[];
+};
+
+export const updateCartItemQuantity = async (
+  data: UpdateCartItemPayload,
+  onSuccess: () => void,
+  onError: (error: any) => void
+) => {
+  await request({
+    method: "patch",
+    url: "/customer/api/cart/update-quantity",
+    data,
+    onSuccess,
+    onError,
+  });
 };
